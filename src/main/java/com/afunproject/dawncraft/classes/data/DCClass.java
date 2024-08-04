@@ -6,7 +6,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.commands.AdvancementCommands;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
@@ -18,6 +22,7 @@ public class DCClass {
     private final List<String> skills = Lists.newArrayList();
     private final List<ItemEntry> items = Lists.newArrayList();
     private final List<AttributeEntry> attributes = Lists.newArrayList();
+    private final List<String> commands = Lists.newArrayList();
     private final String animation;
     
     private final float xOffset, yOffset;
@@ -42,6 +47,8 @@ public class DCClass {
                 ClassesLogger.logError("Error adding attribute " + element, e);
             }
         }
+        if (obj.has("commands")) for (JsonElement element : obj.getAsJsonArray("commands"))
+            commands.add(element.getAsString());
         animation = obj.has("animation") ? obj.get("animation").getAsString()
                 : "epicfight:biped/combat/sword_auto1";
         if (obj.has("offset")) {
@@ -76,7 +83,13 @@ public class DCClass {
     public void addItems(Player player) {
         for (ItemEntry item : items) item.apply(player);
     }
-
+    
+    public void runCommands(ServerPlayer player) {
+        MinecraftServer server = player.server;
+        for (String command : commands) server.getCommands().performCommand(server.createCommandSourceStack(),
+                command.replace("@p", player.getGameProfile().getName()));
+    }
+    
     public int getIndex() {
         return index;
     }
@@ -91,6 +104,10 @@ public class DCClass {
     
     public List<String> getSkills() {
         return skills;
+    }
+    
+    public List<String> getCommands() {
+        return commands;
     }
 
     public void setVisualEquipment(Player player) {
@@ -121,6 +138,9 @@ public class DCClass {
         JsonObject attributes = new JsonObject();
         for (AttributeEntry entry : this.attributes) attributes.addProperty(entry.getName().toString(), entry.getValue());
         obj.add("attributes", attributes);
+        JsonArray commands = new JsonArray();
+        for (String command : this.commands) commands.add(new JsonPrimitive(command));
+        obj.add("commands", commands);
         obj.addProperty("animation", animation);
         JsonArray offset = new JsonArray();
         offset.add(xOffset);
@@ -129,5 +149,5 @@ public class DCClass {
         ClassesLogger.logInfo("Serialized class " + name + " as " + obj);
         return obj;
     }
-
+    
 }

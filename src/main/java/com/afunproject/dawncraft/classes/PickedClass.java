@@ -68,6 +68,7 @@ public interface PickedClass {
             if (ModList.get().isLoaded("epicfight")) EpicFightIntegration.applySkills(clazz, player);
             clazz.applyStatModifiers(player);
             if (addItems) clazz.addItems(player);
+            clazz.runCommands(player);
             ClassesLogger.logInfo("Set player " + player.getDisplayName().getString() + " to class " + clazz);
             hasEffect = true;
         }
