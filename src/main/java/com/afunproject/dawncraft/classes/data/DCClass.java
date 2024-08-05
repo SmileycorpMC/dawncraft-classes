@@ -20,9 +20,9 @@ public class DCClass {
     private final List<String> skills = Lists.newArrayList();
     private final List<ItemEntry> items = Lists.newArrayList();
     private final List<AttributeEntry> attributes = Lists.newArrayList();
-    private final List<String> commands = Lists.newArrayList();
+    private final List<CommandEntry> commands = Lists.newArrayList();
+    private final boolean hidden;
     private final String animation;
-    
     private final float xOffset, yOffset;
 
     public DCClass(ResourceLocation name, JsonObject obj) throws Exception {
@@ -46,7 +46,8 @@ public class DCClass {
             }
         }
         if (obj.has("commands")) for (JsonElement element : obj.getAsJsonArray("commands"))
-            commands.add(element.getAsString());
+            commands.add(CommandEntry.fromJson(element, name.toString()));
+        hidden = obj.has("hidden") ? obj.get("hidden").getAsBoolean() : false;
         animation = obj.has("animation") ? obj.get("animation").getAsString()
                 : "epicfight:biped/combat/sword_auto1";
         if (obj.has("offset")) {
@@ -82,12 +83,9 @@ public class DCClass {
         for (ItemEntry item : items) item.apply(player);
     }
     
-    public void runCommands(ServerPlayer player) {
+    public void runCommands(ServerPlayer player, CommandApplyStage stage) {
         ClassesLogger.logInfo("Running " + this + " commands for player " + player.getDisplayName().getString());
-        MinecraftServer server = player.server;
-        for (String command : commands) server.getCommands().performCommand(server.createCommandSourceStack(),
-                command.replace("@p", player.getGameProfile().getName())
-                        .replace("@s", player.getGameProfile().getName()));
+        for (CommandEntry command : commands) if (command.getStage() == stage) command.apply(player);
     }
     
     public int getIndex() {
@@ -106,7 +104,7 @@ public class DCClass {
         return skills;
     }
     
-    public List<String> getCommands() {
+    public List<CommandEntry> getCommands() {
         return commands;
     }
 
@@ -125,6 +123,10 @@ public class DCClass {
     public float getYOffset() {
         return yOffset;
     }
+    
+    public boolean isHidden() {
+        return hidden;
+    }
 
     public JsonObject serialize() {
         JsonObject obj = new JsonObject();
@@ -139,7 +141,6 @@ public class DCClass {
         for (AttributeEntry entry : this.attributes) attributes.addProperty(entry.getName().toString(), entry.getValue());
         obj.add("attributes", attributes);
         JsonArray commands = new JsonArray();
-        for (String command : this.commands) commands.add(new JsonPrimitive(command));
         obj.add("commands", commands);
         obj.addProperty("animation", animation);
         JsonArray offset = new JsonArray();

@@ -1,5 +1,6 @@
 package com.afunproject.dawncraft.classes;
 
+import com.afunproject.dawncraft.classes.data.CommandApplyStage;
 import com.afunproject.dawncraft.classes.data.DCClass;
 import com.afunproject.dawncraft.classes.integration.epicfight.EpicFightIntegration;
 import net.minecraft.core.Direction;
@@ -11,10 +12,14 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.ModList;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
 public interface PickedClass {
 
-    DCClass getDCClass();
+    Optional<DCClass> getDCClass();
 
+    @Nullable
     void setDCClass(DCClass clazz);
 
     boolean hasPicked();
@@ -37,19 +42,19 @@ public interface PickedClass {
 
     class Implementation implements PickedClass {
 
-        private DCClass clazz;
+        private Optional<DCClass> clazz = Optional.empty();
         private boolean hasEffect;
         private boolean GUIOpen;
         private boolean hasStatModifiers;
 
         @Override
-        public DCClass getDCClass() {
+        public Optional<DCClass> getDCClass() {
             return clazz;
         }
 
         @Override
         public void setDCClass(DCClass clazz) {
-            this.clazz = clazz;
+            this.clazz = clazz == null ? Optional.empty() : Optional.of(clazz);
         }
 
         @Override
@@ -64,19 +69,20 @@ public interface PickedClass {
 
         @Override
         public void applyEffect(ServerPlayer player, boolean addItems) {
-            if (clazz == null) return;
+            if (clazz.isEmpty()) return;
+            DCClass clazz = this.clazz.get();
             if (ModList.get().isLoaded("epicfight")) EpicFightIntegration.applySkills(clazz, player);
             clazz.applyStatModifiers(player);
             if (addItems) clazz.addItems(player);
-            clazz.runCommands(player);
+            clazz.runCommands(player, CommandApplyStage.PICK_CLASS);
             ClassesLogger.logInfo("Set player " + player.getDisplayName().getString() + " to class " + clazz);
             hasEffect = true;
         }
 
         @Override
         public void applyStatModifiers(ServerPlayer player) {
-            if (clazz == null) return;
-            clazz.applyStatModifiers(player);
+            if (clazz.isEmpty()) return;
+            clazz.get().applyStatModifiers(player);
             hasEffect = true;
             hasStatModifiers = true;
         }
@@ -99,14 +105,14 @@ public interface PickedClass {
         @Override
         public CompoundTag save() {
             CompoundTag tag = new CompoundTag();
-            if (clazz != null) tag.putString("class", clazz.toString());
+            if (clazz.isPresent()) tag.putString("class", clazz.get().toString());
             if (hasEffect) tag.putBoolean("hasEffect", hasEffect);
             return tag;
         }
 
         @Override
         public void load(CompoundTag tag) {
-            if (tag.contains("class")) clazz = ClassHandler.getClass(new ResourceLocation(tag.getString("class")));
+            if (tag.contains("class")) clazz = Optional.of(ClassHandler.getClass(new ResourceLocation(tag.getString("class"))));
             if (tag.contains("hasEffect")) hasEffect = tag.getBoolean("hasEffect");
         }
 

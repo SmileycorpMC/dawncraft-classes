@@ -1,5 +1,8 @@
 package com.afunproject.dawncraft.classes;
 
+import com.afunproject.dawncraft.classes.data.CommandApplyStage;
+import com.afunproject.dawncraft.classes.data.CommandEntry;
+import com.afunproject.dawncraft.classes.data.DCClass;
 import com.afunproject.dawncraft.classes.data.DCClassLoader;
 import com.afunproject.dawncraft.classes.network.NetworkHandler;
 import com.afunproject.dawncraft.classes.network.OpenClassGUIMessage;
@@ -15,11 +18,15 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkDirection;
+
+import java.util.Optional;
 
 public class EventHandler {
     
@@ -69,17 +76,64 @@ public class EventHandler {
             cap.setGUIOpen(true);
         }
         if (cap.hasPicked() &! cap.hasStatModifiers()) cap.applyStatModifiers((ServerPlayer) player);
+        Optional<DCClass> clazz = cap.getDCClass();
+        if (clazz.isEmpty()) return;
+        for (CommandEntry entry : clazz.get().getCommands()) {
+            CommandApplyStage stage = entry.getStage();
+            if (stage instanceof CommandApplyStage.Ticking && player.tickCount %
+                    ((CommandApplyStage.Ticking) stage).getInterval() == 0)
+                entry.apply((ServerPlayer) player);
+        }
     }
     
     @SubscribeEvent
     public void damage(LivingAttackEvent event) {
         if (event.getEntity() == null) return;
-        Entity player = event.getEntity();
-        if (!(player instanceof ServerPlayer)) return;
-        LazyOptional<PickedClass> optional = player.getCapability(DCClasses.PICKED_CLASS);
+        Entity entity = event.getEntity();
+        LazyOptional<PickedClass> optional = entity.getCapability(DCClasses.PICKED_CLASS);
         if (!optional.isPresent()) return;
         PickedClass cap = optional.orElseGet(null);
         if (cap.isGUIOpen()) event.setCanceled(true);
+        Optional<DCClass> clazz = cap.getDCClass();
+        if (clazz.isEmpty()) return;
+        clazz.get().runCommands((ServerPlayer) entity, CommandApplyStage.HURT);
+    }
+    
+    @SubscribeEvent
+    public void livingHurtEvent(LivingHurtEvent event) {
+        Entity attacker = event.getSource().getDirectEntity();
+        if (!(attacker instanceof ServerPlayer)) return;
+        LazyOptional<PickedClass> optional = attacker.getCapability(DCClasses.PICKED_CLASS);
+        if (!optional.isPresent()) return;
+        Optional<DCClass> clazz = optional.orElseGet(null).getDCClass();
+        if (clazz.isEmpty()) return;
+        clazz.get().runCommands((ServerPlayer) attacker, CommandApplyStage.ATTACK);
+    }
+    
+    @SubscribeEvent
+    public void dieEvent(LivingDeathEvent event) {
+        Entity entity = event.getEntity();
+        if (!(entity instanceof ServerPlayer)) return;
+        LazyOptional<PickedClass> optional = entity.getCapability(DCClasses.PICKED_CLASS);
+        if (!optional.isPresent()) return;
+        PickedClass cap = optional.orElseGet(null);
+        if (cap.isGUIOpen()) event.setCanceled(true);
+        Optional<DCClass> clazz = cap.getDCClass();
+        if (clazz.isEmpty()) return;
+        clazz.get().runCommands((ServerPlayer) entity, CommandApplyStage.DIE);
+    }
+    
+    @SubscribeEvent
+    public void killEvent(LivingDeathEvent event) {
+        Entity entity = event.getSource().getEntity();
+        if (!(entity instanceof ServerPlayer)) return;
+        LazyOptional<PickedClass> optional = entity.getCapability(DCClasses.PICKED_CLASS);
+        if (!optional.isPresent()) return;
+        PickedClass cap = optional.orElseGet(null);
+        if (cap.isGUIOpen()) event.setCanceled(true);
+        Optional<DCClass> clazz = cap.getDCClass();
+        if (clazz.isEmpty()) return;
+        clazz.get().runCommands((ServerPlayer) entity, CommandApplyStage.KILL);
     }
 
     @SubscribeEvent
@@ -94,6 +148,9 @@ public class EventHandler {
         if (optionalOld.isPresent() && optional.isPresent()) {
             PickedClass cap = optional.orElseGet(null);
             cap.load(optionalOld.orElseGet(null).save());
+            Optional<DCClass> clazz = cap.getDCClass();
+            if (clazz.isEmpty()) return;
+            clazz.get().runCommands((ServerPlayer) player, CommandApplyStage.RESPAWN);
         }
     }
 

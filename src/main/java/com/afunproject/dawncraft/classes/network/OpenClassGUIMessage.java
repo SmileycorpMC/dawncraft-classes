@@ -29,6 +29,7 @@ public class OpenClassGUIMessage extends SimpleAbstractMessage {
     @Override
     public void write(FriendlyByteBuf buf) {
         for (DCClass clazz : ClassHandler.getClasses()) {
+            if (clazz.isHidden()) continue;
             buf.writeUtf(clazz.getRegistryName().toString());
             buf.writeUtf(clazz.serialize().toString());
         }
