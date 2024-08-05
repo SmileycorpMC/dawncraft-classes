@@ -1,6 +1,5 @@
 package com.afunproject.dawncraft.classes.integration.epicfight.client;
 
-import com.afunproject.dawncraft.classes.data.DCClass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;

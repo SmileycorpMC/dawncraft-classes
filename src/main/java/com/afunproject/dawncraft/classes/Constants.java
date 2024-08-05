@@ -9,6 +9,7 @@ public class Constants {
     public static ResourceLocation loc(String path) {
         return new ResourceLocation(MODID, path);
     }
+    
     public static String locStr(String path) {
         return loc(path).toString();
     }
