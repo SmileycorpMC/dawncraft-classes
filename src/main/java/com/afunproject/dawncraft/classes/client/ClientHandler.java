@@ -4,8 +4,11 @@ import com.afunproject.dawncraft.classes.Constants;
 import com.afunproject.dawncraft.classes.data.DCClass;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -24,6 +27,13 @@ public class ClientHandler {
         RENDER_SCREEN = false;
         mc.setScreen(new ClassSelectionScreen(CLASS_CACHE));
         CLASS_CACHE.clear();
+    }
+    
+    @SubscribeEvent
+    public static void renderNameplate(RenderNameplateEvent event) {
+        if (!(event.getEntity() instanceof RemotePlayer)) return;
+        if (Minecraft.getInstance().player.getGameProfile().equals(((RemotePlayer) event.getEntity()).getGameProfile()))
+            event.setResult(Event.Result.DENY);
     }
 
     public static void displayGUI(List<DCClass> cache) {
