@@ -13,7 +13,7 @@ import java.util.List;
 
 public class OpenClassGUIMessage extends SimpleAbstractMessage {
 
-    private List<DCClass> cache = Lists.newArrayList();
+    private List<DCClass> classes = Lists.newArrayList();
 
     public OpenClassGUIMessage() {}
 
@@ -21,7 +21,7 @@ public class OpenClassGUIMessage extends SimpleAbstractMessage {
     public void read(FriendlyByteBuf buf) {
         while (buf.isReadable()) {
             try {
-               cache.add(new DCClass(new ResourceLocation(buf.readUtf()), JsonParser.parseString(buf.readUtf()).getAsJsonObject()));
+               classes.add(new DCClass(new ResourceLocation(buf.readUtf()), JsonParser.parseString(buf.readUtf()).getAsJsonObject()));
             } catch (Exception e) {}
         }
     }
@@ -35,8 +35,8 @@ public class OpenClassGUIMessage extends SimpleAbstractMessage {
         }
     }
 
-    public List<DCClass> getCache() {
-        return cache;
+    public List<DCClass> getClasses() {
+        return classes;
     }
 
     @Override

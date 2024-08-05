@@ -7,7 +7,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -42,7 +41,7 @@ public class DCClass {
             try {
                attributes.add(new AttributeEntry(new ResourceLocation(element), aobj.get(element).getAsDouble()));
             } catch (Exception e) {
-                ClassesLogger.logError("Error adding attribute " + element, e);
+                ClassesLogger.logInfo("Error adding attribute " + element + ", " + e.getMessage());
             }
         }
         if (obj.has("commands")) for (JsonElement element : obj.getAsJsonArray("commands"))
@@ -75,17 +74,18 @@ public class DCClass {
     }
 
     public void applyStatModifiers(Player player) {
-        ClassesLogger.logInfo("Applying " + this + " modififers to player " + player.getDisplayName().getString());
+        ClassesLogger.logInfo("Applying " + this + " modifiers to player " + player.getDisplayName().getString());
         for (AttributeEntry entry : attributes) entry.apply(player);
+        player.setHealth(player.getMaxHealth());
     }
 
     public void addItems(Player player) {
         for (ItemEntry item : items) item.apply(player);
     }
     
-    public void runCommands(ServerPlayer player, CommandApplyStage stage) {
+    public void runCommands(ServerPlayer player, CommandApplyStage... stages) {
         ClassesLogger.logInfo("Running " + this + " commands for player " + player.getDisplayName().getString());
-        for (CommandEntry command : commands) if (command.getStage() == stage) command.apply(player);
+        for (CommandEntry command : commands) for (CommandApplyStage stage : stages) if (command.getStage() == stage) command.apply(player);
     }
     
     public int getIndex() {

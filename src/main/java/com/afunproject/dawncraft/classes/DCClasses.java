@@ -36,7 +36,6 @@ public class DCClasses {
     @SubscribeEvent
     public static void addPacks(AddPackFindersEvent event) {
         Path path = FMLPaths.CONFIGDIR.get().resolve("dcclasses");
-        ClassesLogger.logInfo(path);
         event.addRepositorySource((consumer, constructor) -> consumer.accept(constructor.create(path.toString(), new TextComponent("DC Classes Config"), true,
                     ()-> new FolderPackResources(path.toFile()), new PackMetadataSection(new TextComponent("DC Classes Config"), 8),
                     Pack.Position.TOP, PackSource.BUILT_IN, false))

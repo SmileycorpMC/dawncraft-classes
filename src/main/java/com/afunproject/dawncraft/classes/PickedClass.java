@@ -59,7 +59,7 @@ public interface PickedClass {
 
         @Override
         public boolean hasPicked() {
-            return clazz != null;
+            return clazz.isPresent();
         }
 
         @Override
@@ -72,9 +72,9 @@ public interface PickedClass {
             if (clazz.isEmpty()) return;
             DCClass clazz = this.clazz.get();
             if (ModList.get().isLoaded("epicfight")) EpicFightIntegration.applySkills(clazz, player);
-            clazz.applyStatModifiers(player);
+            applyStatModifiers(player);
             if (addItems) clazz.addItems(player);
-            clazz.runCommands(player, CommandApplyStage.PICK_CLASS);
+            clazz.runCommands(player, CommandApplyStage.PICK_CLASS, CommandApplyStage.RESPAWN);
             ClassesLogger.logInfo("Set player " + player.getDisplayName().getString() + " to class " + clazz);
             hasEffect = true;
         }

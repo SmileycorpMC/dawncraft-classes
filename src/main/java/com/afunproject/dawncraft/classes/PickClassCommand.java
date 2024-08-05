@@ -25,7 +25,6 @@ public class PickClassCommand {
     }
 
     public static int execute(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ClassesLogger.logInfo(ctx);
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "player")) {
             LazyOptional<PickedClass> optional = player.getCapability(DCClasses.PICKED_CLASS, null);
             try {
