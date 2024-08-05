@@ -6,10 +6,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -85,9 +83,11 @@ public class DCClass {
     }
     
     public void runCommands(ServerPlayer player) {
+        ClassesLogger.logInfo("Running " + this + " commands for player " + player.getDisplayName().getString());
         MinecraftServer server = player.server;
         for (String command : commands) server.getCommands().performCommand(server.createCommandSourceStack(),
-                command.replace("@p", player.getGameProfile().getName()));
+                command.replace("@p", player.getGameProfile().getName())
+                        .replace("@s", player.getGameProfile().getName()));
     }
     
     public int getIndex() {
