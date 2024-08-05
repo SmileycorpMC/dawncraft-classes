@@ -3,10 +3,12 @@ package com.afunproject.dawncraft.classes.network;
 import com.afunproject.dawncraft.classes.ClassHandler;
 import com.afunproject.dawncraft.classes.DCClasses;
 import com.afunproject.dawncraft.classes.PickedClass;
+import com.afunproject.dawncraft.classes.event.PickClassEvent;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.smileycorp.atlas.api.network.SimpleAbstractMessage;
 
@@ -37,9 +39,12 @@ public class PickClassMessage extends SimpleAbstractMessage {
         LazyOptional<PickedClass> optional = sender.getCapability(DCClasses.PICKED_CLASS);
         if (optional.isPresent()) {
             PickedClass cap = optional.orElseGet(null);
-            cap.setDCClass(ClassHandler.getClass(loc));
+            PickClassEvent event = new PickClassEvent.Pre(sender, ClassHandler.getClass(loc), true);
+            MinecraftForge.EVENT_BUS.post(event);
+            cap.setDCClass(event.getDCClass());
             cap.applyEffect(sender, true);
             cap.setGUIOpen(false);
+            MinecraftForge.EVENT_BUS.post(new PickClassEvent.Post(sender, event.getDCClass(), true));
         }
     }
 

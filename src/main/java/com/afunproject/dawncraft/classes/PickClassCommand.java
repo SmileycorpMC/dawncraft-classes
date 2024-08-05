@@ -1,5 +1,6 @@
 package com.afunproject.dawncraft.classes;
 
+import com.afunproject.dawncraft.classes.event.PickClassEvent;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -10,6 +11,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 
 public class PickClassCommand {
@@ -30,9 +32,12 @@ public class PickClassCommand {
                 if (optional.isPresent()) {
                     PickedClass cap = optional.resolve().get();
                     ResourceLocation clazz = ResourceLocationArgument.getId(ctx, "class");
-                    cap.setDCClass(ClassHandler.getClass(clazz));
+                    PickClassEvent event = new PickClassEvent.Pre(player, ClassHandler.getClass(clazz), true);
+                    MinecraftForge.EVENT_BUS.post(event);
+                    cap.setDCClass(event.getDCClass());
                     if (cap.hasEffect()) cap.applyEffect(player, false);
                     else cap.applyEffect(player, true);
+                    MinecraftForge.EVENT_BUS.post(new PickClassEvent.Post(player, event.getDCClass(), true));
                     ClassesLogger.logInfo("Successfully ran command to add " + player + " to class " + clazz);
                 }
             } catch (Exception e) {
