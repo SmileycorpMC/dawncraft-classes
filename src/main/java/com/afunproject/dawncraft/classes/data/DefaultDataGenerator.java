@@ -20,13 +20,13 @@ public class DefaultDataGenerator {
     public static boolean tryGenerateDataFiles() {
         if (CONFIG_FOLDER.toFile().exists()) return false;
         CONFIG_FOLDER.toFile().mkdirs();
-        ModFile mod = FMLLoader.getLoadingModList().getModFileById("hordes").getFile();
+        ModFile mod = FMLLoader.getLoadingModList().getModFileById("dcclasses").getFile();
         try {
-            Files.find(mod.findResource("dcclasses"), Integer.MAX_VALUE, (matcher, options) -> options.isRegularFile())
+            Files.find(mod.findResource("config_defaults"), Integer.MAX_VALUE, (matcher, options) -> options.isRegularFile())
                     .forEach(DefaultDataGenerator::copyFileFromMod);
             ClassesLogger.logInfo("Generated data files.");
         } catch (Exception e) {
-            ClassesLogger.logInfo("Failed to generate data files.");
+            ClassesLogger.logError("Failed to generate data files", e);
         }
         return true;
     }
