@@ -1,6 +1,7 @@
 package com.afunproject.dawncraft.classes.client;
 
 import com.afunproject.dawncraft.classes.ClassesLogger;
+import com.afunproject.dawncraft.classes.Constants;
 import com.afunproject.dawncraft.classes.data.AttributeEntry;
 import com.afunproject.dawncraft.classes.data.DCClass;
 import com.afunproject.dawncraft.classes.data.ItemEntry;
@@ -21,7 +22,6 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.gui.GuiUtils;
@@ -69,8 +69,8 @@ public class ClassSelectionScreen extends Screen {
         buttons.clear();
         leftPos = (width - guiWidth) / 2;
         topPos = (height - guiHeight) / 2;
-        buttons.add(new Button(leftPos, topPos - 10, 20, 20, new TextComponent("<"), b -> switchPage(page - 1)));
-        buttons.add(new Button(leftPos + guiWidth - 20, topPos -10, 20, 20, new TextComponent(">"), b -> switchPage(page + 1)));
+        buttons.add(new Button(leftPos - 5, topPos - 10, 20, 20, new TextComponent("<"), b -> switchPage(page - 1)));
+        buttons.add(new Button(leftPos + guiWidth - 16, topPos - 10, 20, 20, new TextComponent(">"), b -> switchPage(page + 1)));
         buttons.add(new Button(leftPos + guiWidth / 2 - 30, topPos + guiHeight, 60, 20, new TranslatableComponent("button.dcclasses.confirm"), b -> confirm()));
         reloadSlots();
     }
@@ -78,6 +78,7 @@ public class ClassSelectionScreen extends Screen {
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         renderDirtBackground(0);
+        GuiUtils.drawContinuousTexturedBox(poseStack, Constants.loc("textures/gui/class_selection.png"), leftPos + 10, topPos + 10, 0, 0, 148, 106, 32, 42, 19, 9, 9,9, 1);
         for(Widget widget : buttons) widget.render(poseStack, mouseX,mouseY, partialTicks);
         DCClass clazz = getSelectedClass();
         if (clazz == null) return;
@@ -99,11 +100,11 @@ public class ClassSelectionScreen extends Screen {
         //items, skills and attributes
         if (itemHeight > 0) {
             drawBox(poseStack, itemX, topPos + 17, itemWidth, itemHeight);
-            drawCenteredString(poseStack, minecraft.font, new TranslatableComponent("text.dcclasses.items"), leftPos - 10, topPos + 21, 0xFFFFFF);
+            drawCenteredString(poseStack, minecraft.font, new TranslatableComponent("text.dcclasses.items"), leftPos - 12, topPos + 21, 0xFFFFFF);
         }
         if (skillHeight > 0) {
             drawBox(poseStack, skillX, topPos + 17, skillWidth, skillHeight);
-            drawCenteredString(poseStack, minecraft.font, new TranslatableComponent("text.dcclasses.skills"), leftPos + guiWidth + 10, topPos + 21, 0xFFFFFF);
+            drawCenteredString(poseStack, minecraft.font, new TranslatableComponent("text.dcclasses.skills"), leftPos + guiWidth + 12, topPos + 21, 0xFFFFFF);
         }
         ClassSlot hoveredSlot = null;
         for (ClassSlot slot : slots) {
@@ -112,7 +113,7 @@ public class ClassSelectionScreen extends Screen {
         }
         if (hoveredSlot != null) renderTooltip(poseStack, hoveredSlot.getTooltip(), Optional.empty(), mouseX, mouseY);
     }
-
+    
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int p_95587_) {
         for (Button button : buttons) if (button.isMouseOver(mouseX, mouseY)) return button.mouseClicked(mouseX, mouseY, p_95587_);
@@ -199,25 +200,25 @@ public class ClassSelectionScreen extends Screen {
         for (int i = 0; i < attributes.size(); i++) {
             AttributeEntry attribute = attributes.get(i);
             int width = minecraft.font.width(attribute.getText()) + 11;
-            slots.add(new AttributeSlot(attribute, width, leftPos + 11 + (int)(((float)(guiWidth - 11) * (i + 0.25f) - width * 0.5f) / (float)attributes.size()), topPos + 11));
+            slots.add(new AttributeSlot(attribute, width, leftPos + 11 + (int)((((float)guiWidth - 22f) * (float) (i + 1)) / (float) attributes.size() + 1f) - (int)((float)width * 0.5f), topPos + 13));
         }
         List<ItemEntry> items = clazz.getItems();
         int itemRows = (int)(((float)items.size() -1) / 3f) + 1;
         itemWidth = Math.max(itemRows * 18, minecraft.font.width(new TranslatableComponent("text.dcclasses.items"))) + 8;
-        itemHeight = items.isEmpty() ? 0 : 21 + (int)Math.ceil((float)items.size()/(float)itemRows) * 18;
-        itemX = leftPos - 10 - (int)((float)itemWidth / 2f);
-        for (int i = 0; i < items.size(); i++) slots.add(new ItemSlot(items.get(i),leftPos - 26 + itemRows * 8 - i % itemRows * 18, topPos + 34 + (i / itemRows) * 18));
+        itemHeight = items.isEmpty() ? 0 : 20 + (int)Math.ceil((float)items.size()/(float)itemRows) * 18;
+        itemX = leftPos - 12 - (int)((float)itemWidth / 2f);
+        for (int i = 0; i < items.size(); i++) slots.add(new ItemSlot(items.get(i),leftPos - 28 + itemRows * 8 - i % itemRows * 18, topPos + 32 + (i / itemRows) * 18));
         if (!ModList.get().isLoaded("epicfight")) return;
         List<String> skills = EpicFightIntegration.getVerifiedSkills(clazz);
         int skillRows = (int)((float)(skills.size() -1) / 3f) + 1;
         skillWidth = Math.max(skillRows * 18, minecraft.font.width(new TranslatableComponent("text.dcclasses.skills"))) + 8;
-        skillHeight = skills.isEmpty() ? 0 : 21 + (int)Math.ceil((float)skills.size()/(float)skillRows) * 18;
-        skillX = leftPos + guiWidth + 10 - (int)((float)skillWidth / 2f);
-        for (int i = 0; i < skills.size(); i++) slots.add(new SkillSlot(skills.get(i), leftPos + guiWidth + 10 - skillRows * 8 + i % skillRows * 18, topPos + 34 + (i / skillRows) * 18));
+        skillHeight = skills.isEmpty() ? 0 : 20 + (int)Math.ceil((float)skills.size()/(float)skillRows) * 18;
+        skillX = leftPos + guiWidth + 12 - (int)((float)skillWidth / 2f);
+        for (int i = 0; i < skills.size(); i++) slots.add(new SkillSlot(skills.get(i), leftPos + guiWidth + 12 - skillRows * 8 + i % skillRows * 18, topPos + 32 + (i / skillRows) * 18));
     }
     
     private void drawBox(PoseStack poseStack, int x, int y, int width, int height) {
-        GuiUtils.drawContinuousTexturedBox(poseStack, new ResourceLocation("textures/gui/recipe_book.png"), x, y, 82, 208, width, height, 32, 32, 4, 4, 4, 4, 1);
+        GuiUtils.drawContinuousTexturedBox(poseStack, Constants.loc("textures/gui/class_selection.png"), x, y, 0, 42, width, height, 32, 32, 4, 4, 4, 4, 1);
     }
     
     @Override

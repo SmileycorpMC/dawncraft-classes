@@ -37,7 +37,7 @@ public class AttributeSlot extends ClassSlot {
         GuiComponent.blit(poseStack, x + 1, y + 1, 1, 0, 0, 9, 9, 9, 9);
         RenderSystem.disableBlend();
         poseStack.popPose();
-        GuiComponent.drawString(poseStack, minecraft.font,  attribute.getText(), x + 11, y + 2, attribute.getTextColour().getValue());
+        GuiComponent.drawString(poseStack, minecraft.font, attribute.getText(), x + 11, y + 2, attribute.getTextColour().getValue());
     }
     
 }
