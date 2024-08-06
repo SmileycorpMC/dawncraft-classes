@@ -73,7 +73,7 @@ public class ClassSelectionScreen extends Screen {
         buttons.clear();
         leftPos = (width - guiWidth) / 2;
         topPos = (height - guiHeight) / 2;
-        buttons.add(new ClassSwitchButton(this, leftPos - 5, topPos - 10, true));
+        buttons.add(new ClassSwitchButton(this, leftPos + 4, topPos - 10, true));
         buttons.add(new ClassSwitchButton(this, leftPos + guiWidth - 16, topPos - 10, false));
         buttons.add(new Button(leftPos + guiWidth / 2 - 30, topPos + guiHeight, 60, 20, new TranslatableComponent("button.dcclasses.confirm"), b -> confirm()));
         reloadSlots();
@@ -83,12 +83,12 @@ public class ClassSelectionScreen extends Screen {
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         renderDirtBackground(0);
         GuiUtils.drawContinuousTexturedBox(poseStack, TEXTURE, leftPos + 10, topPos + 10, 0, 0, 148, 106, 32, 42, 19, 9, 9,9, 1);
-        for(Widget widget : buttons) widget.render(poseStack, mouseX,mouseY, partialTicks);
+        for(Widget widget : buttons) widget.render(poseStack, mouseX, mouseY, partialTicks);
         DCClass clazz = getSelectedClass();
         if (clazz == null) return;
         //title
-        drawBox(poseStack, leftPos + 18, topPos - 10, 131, 20);
-        drawCenteredString(poseStack, minecraft.font,  new TranslatableComponent(clazz.getTranslationKey()), leftPos + guiWidth /2, topPos -4, 0x9E0CD2);
+        drawBox(poseStack, leftPos + 18, topPos - 10, 131, 17);
+        drawCenteredString(poseStack, minecraft.font,  new TranslatableComponent(clazz.getTranslationKey()), leftPos + guiWidth /2, topPos -6, 0x9E0CD2);
         //description
         int offset = (int)((float)(description.size() * 9)/2f);
         drawBox(poseStack, leftPos - 6, topPos + guiHeight / 2 + 48 - offset, 179, description.size() * 9 + 8);

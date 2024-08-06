@@ -2,8 +2,6 @@ package com.afunproject.dawncraft.classes.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
@@ -16,7 +14,7 @@ public class ClassSwitchButton extends AbstractButton {
     private final boolean back;
     
     public ClassSwitchButton(ClassSelectionScreen screen, int x, int y, boolean back) {
-        super(x, y, 11, 7, Component.nullToEmpty(null));
+        super(x, y, 11, 17, Component.nullToEmpty(null));
         this.screen = screen;
         this.back = back;
     }
@@ -28,7 +26,6 @@ public class ClassSwitchButton extends AbstractButton {
     
     @Override
     public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, ClassSelectionScreen.TEXTURE);
         RenderSystem.setShaderColor(1, 1, 1, alpha);
