@@ -200,7 +200,7 @@ public class ClassSelectionScreen extends Screen {
         for (int i = 0; i < attributes.size(); i++) {
             AttributeEntry attribute = attributes.get(i);
             int width = minecraft.font.width(attribute.getText()) + 11;
-            slots.add(new AttributeSlot(attribute, width, leftPos + 11 + (int)((((float)guiWidth - 22f) * (float) (i + 1)) / (float) attributes.size() + 1f) - (int)((float)width * 0.5f), topPos + 13));
+            slots.add(new AttributeSlot(attribute, width, leftPos + 11 + (int)((((float)guiWidth - 22f) * (float) (i + 1)) / (attributes.size() + 1f)) - (int)((float)width * 0.5f), topPos + 13));
         }
         List<ItemEntry> items = clazz.getItems();
         int itemRows = (int)(((float)items.size() -1) / 3f) + 1;
