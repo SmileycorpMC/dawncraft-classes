@@ -14,6 +14,7 @@ import com.afunproject.dawncraft.classes.network.PickClassMessage;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
@@ -22,6 +23,7 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.gui.GuiUtils;
@@ -35,6 +37,8 @@ import java.util.stream.Collectors;
 
 public class ClassSelectionScreen extends Screen {
     
+    public static final ResourceLocation TEXTURE = Constants.loc("textures/gui/class_selection.png");
+    
     private static final int TEXT_WIDTH = 40;
     protected int guiWidth = 168;
     protected int guiHeight = 180;
@@ -42,7 +46,7 @@ public class ClassSelectionScreen extends Screen {
     private final List<DCClass> classes;
     private final RemotePlayer player;
     private final EpicFightPlayerRenderer playerRenderer;
-    private final List<Button> buttons = Lists.newArrayList();
+    private final List<AbstractButton> buttons = Lists.newArrayList();
     protected int leftPos;
     protected int topPos;
     protected final List<Component> description = Lists.newArrayList();
@@ -69,8 +73,8 @@ public class ClassSelectionScreen extends Screen {
         buttons.clear();
         leftPos = (width - guiWidth) / 2;
         topPos = (height - guiHeight) / 2;
-        buttons.add(new Button(leftPos - 5, topPos - 10, 20, 20, new TextComponent("<"), b -> switchPage(page - 1)));
-        buttons.add(new Button(leftPos + guiWidth - 16, topPos - 10, 20, 20, new TextComponent(">"), b -> switchPage(page + 1)));
+        buttons.add(new ClassSwitchButton(this, leftPos - 5, topPos - 10, true));
+        buttons.add(new ClassSwitchButton(this, leftPos + guiWidth - 16, topPos - 10, false));
         buttons.add(new Button(leftPos + guiWidth / 2 - 30, topPos + guiHeight, 60, 20, new TranslatableComponent("button.dcclasses.confirm"), b -> confirm()));
         reloadSlots();
     }
@@ -78,7 +82,7 @@ public class ClassSelectionScreen extends Screen {
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         renderDirtBackground(0);
-        GuiUtils.drawContinuousTexturedBox(poseStack, Constants.loc("textures/gui/class_selection.png"), leftPos + 10, topPos + 10, 0, 0, 148, 106, 32, 42, 19, 9, 9,9, 1);
+        GuiUtils.drawContinuousTexturedBox(poseStack, TEXTURE, leftPos + 10, topPos + 10, 0, 0, 148, 106, 32, 42, 19, 9, 9,9, 1);
         for(Widget widget : buttons) widget.render(poseStack, mouseX,mouseY, partialTicks);
         DCClass clazz = getSelectedClass();
         if (clazz == null) return;
@@ -116,7 +120,7 @@ public class ClassSelectionScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int p_95587_) {
-        for (Button button : buttons) if (button.isMouseOver(mouseX, mouseY)) return button.mouseClicked(mouseX, mouseY, p_95587_);
+        for (AbstractButton button : buttons) if (button.isMouseOver(mouseX, mouseY)) return button.mouseClicked(mouseX, mouseY, p_95587_);
         return false;
     }
     
@@ -126,8 +130,8 @@ public class ClassSelectionScreen extends Screen {
         super.onClose();
     }
 
-    private void switchPage(int page) {
-        this.page = Math.floorMod(page, classes.size());
+    public void switchPage(int page) {
+        this.page = Math.floorMod(page + this.page, classes.size());
         reloadEquipment();
         reloadText();
         reloadSlots();
@@ -218,7 +222,7 @@ public class ClassSelectionScreen extends Screen {
     }
     
     private void drawBox(PoseStack poseStack, int x, int y, int width, int height) {
-        GuiUtils.drawContinuousTexturedBox(poseStack, Constants.loc("textures/gui/class_selection.png"), x, y, 0, 42, width, height, 32, 32, 4, 4, 4, 4, 1);
+        GuiUtils.drawContinuousTexturedBox(poseStack, TEXTURE, x, y, 0, 42, width, height, 32, 32, 4, 4, 4, 4, 1);
     }
     
     @Override
