@@ -75,7 +75,7 @@ public class ClassSelectionScreen extends Screen {
         topPos = (height - guiHeight) / 2;
         buttons.add(new ClassSwitchButton(this, leftPos + 4, topPos - 10, true));
         buttons.add(new ClassSwitchButton(this, leftPos + guiWidth - 16, topPos - 10, false));
-        buttons.add(new Button(leftPos + guiWidth / 2 - 30, topPos + guiHeight, 60, 20, new TranslatableComponent("button.dcclasses.confirm"), b -> confirm()));
+        buttons.add(new ConfirmButtom(this, leftPos + guiWidth / 2 - 30, topPos + guiHeight));
         reloadSlots();
     }
 
@@ -137,7 +137,7 @@ public class ClassSelectionScreen extends Screen {
         reloadSlots();
     }
     
-    private void confirm() {
+    public void confirm() {
         NetworkHandler.NETWORK_INSTANCE.sendTo(new PickClassMessage(getSelectedClass().getRegistryName()),
                 minecraft.player.connection.getConnection(), NetworkDirection.PLAY_TO_SERVER);
         onClose();
