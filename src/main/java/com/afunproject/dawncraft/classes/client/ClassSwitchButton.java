@@ -1,12 +1,11 @@
 package com.afunproject.dawncraft.classes.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.GuiUtils;
 
 public class ClassSwitchButton extends AbstractButton {
     
@@ -25,17 +24,17 @@ public class ClassSwitchButton extends AbstractButton {
     }
     
     @Override
-    public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(GuiGraphics gui, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, ClassSelectionScreen.TEXTURE);
         RenderSystem.setShaderColor(1, 1, 1, alpha);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
-        GuiUtils.drawTexturedModalRect(poseStack, x, y, back ? 15 : 1, isHovered ? 93 : 75, width, height, 1f);
+        gui.blit(ClassSelectionScreen.TEXTURE, getX(),getY(), back ? 15 : 1, isHovered ? 93 : 75, width, height);
     }
     
     @Override
-    public void updateNarration(NarrationElementOutput p_169152_) {}
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
     
 }

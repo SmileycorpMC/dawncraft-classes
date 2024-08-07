@@ -19,8 +19,8 @@ public class CommandEntry {
     public void apply(ServerPlayer player) {
         MinecraftServer server = player.getServer();
         ClassesLogger.logInfo("Running command " + command + " for player " + player.getDisplayName().getString());
-        server.getCommands().performCommand(server.createCommandSourceStack().withSuppressedOutput().withPermission(2)
-                        .withEntity(player).withPosition(player.position()).withLevel(player.getLevel()), command);
+        server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput().withPermission(2)
+                        .withEntity(player).withPosition(player.position()).withLevel(player.serverLevel()), command);
     }
     
     public CommandApplyStage getStage() {

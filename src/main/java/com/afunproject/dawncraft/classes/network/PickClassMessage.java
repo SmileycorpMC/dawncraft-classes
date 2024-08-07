@@ -10,9 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
-import net.smileycorp.atlas.api.network.SimpleAbstractMessage;
+import net.minecraftforge.network.NetworkEvent;
+import net.smileycorp.atlas.api.network.AbstractMessage;
 
-public class PickClassMessage extends SimpleAbstractMessage {
+public class PickClassMessage extends AbstractMessage {
 
     private ResourceLocation loc;
 
@@ -26,7 +27,7 @@ public class PickClassMessage extends SimpleAbstractMessage {
     public void read(FriendlyByteBuf buf) {
         loc = buf.readResourceLocation();
     }
-
+    
     @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeResourceLocation(loc);
@@ -34,6 +35,12 @@ public class PickClassMessage extends SimpleAbstractMessage {
 
     @Override
     public void handle(PacketListener listener) {}
+    
+    @Override
+    public void process(NetworkEvent.Context ctx) {
+        ctx.enqueueWork(() -> apply(ctx.getSender()));
+        ctx.setPacketHandled(true);
+    }
 
     public void apply(ServerPlayer sender) {
         LazyOptional<PickedClass> optional = sender.getCapability(DCClasses.PICKED_CLASS);

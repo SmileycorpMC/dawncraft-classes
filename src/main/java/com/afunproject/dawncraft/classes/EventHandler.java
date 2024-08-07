@@ -43,14 +43,13 @@ public class EventHandler {
     @SubscribeEvent
     public void attachEntityCapabilities(AttachCapabilitiesEvent<Entity> event) {
         Entity entity = event.getObject();
-        if (entity instanceof Player &! (entity instanceof FakePlayer)) {
+        if (entity instanceof Player &! (entity instanceof FakePlayer))
             event.addCapability(Constants.loc("picked_class"), new PickedClass.Provider());
-        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void loggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if (!(player instanceof ServerPlayer)) return;
         LazyOptional<PickedClass> optional = player.getCapability(DCClasses.PICKED_CLASS);
         if (!optional.isPresent()) return;
@@ -63,7 +62,7 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public void tick(LivingEvent.LivingUpdateEvent event) {
+    public void tick(LivingEvent.LivingTickEvent event) {
         if (event.getEntity() == null) return;
         Entity player = event.getEntity();
         if (!(player instanceof ServerPlayer)) return;
@@ -138,9 +137,9 @@ public class EventHandler {
 
     @SubscribeEvent
     public void playerClone(PlayerEvent.Clone event) {
-        if (!(event.getPlayer() instanceof ServerPlayer)) return;
+        if (!(event.getEntity() instanceof ServerPlayer)) return;
         Player original = event.getOriginal();
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         original.reviveCaps();
         if (!original.getGameProfile().equals(player.getGameProfile())) return;
         LazyOptional<PickedClass> optionalOld = original.getCapability(DCClasses.PICKED_CLASS);

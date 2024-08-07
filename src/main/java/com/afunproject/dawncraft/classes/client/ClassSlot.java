@@ -1,11 +1,11 @@
 package com.afunproject.dawncraft.classes.client;
 
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
-public abstract class ClassSlot implements Widget {
+public abstract class ClassSlot implements Renderable {
     
     protected final int x, y, width, height;
     

@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderNameplateEvent;
+import net.minecraftforge.client.event.RenderNameTagEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,7 +30,7 @@ public class ClientHandler {
     }
     
     @SubscribeEvent
-    public static void renderNameplate(RenderNameplateEvent event) {
+    public static void renderNameplate(RenderNameTagEvent event) {
         if (!(event.getEntity() instanceof RemotePlayer)) return;
         if (Minecraft.getInstance().player.getGameProfile().equals(((RemotePlayer) event.getEntity()).getGameProfile()))
             event.setResult(Event.Result.DENY);

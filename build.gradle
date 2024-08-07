@@ -1,56 +1,49 @@
-buildscript {
-    repositories {
-        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://maven.minecraftforge.net' }
-		maven { url = "https://repo.spongepowered.org/maven" }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-	}
-}
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-
-repositories {
-	maven {
-        url "https://www.cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-	maven {
-        url = "https://maven.theillusivec4.top/"
-    }
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
+version = "${minecraft_version}-${mod_version}"
+group = "com.afunproject.dawncraft.classes"
 
-version = '1.1.5'
-group = 'com.afunproject.dawncraft.classes' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'DC-Classes'
+base {
+    archivesName = mod_name
+}
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
-	mappings channel: 'official', version: '1.18'
+    mappings channel: mapping_channel, version: mapping_version
 
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+    copyIdeResources = true
+
+	accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         client {
             workingDirectory project.file('run')
 
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
             property 'forge.logging.markers', 'REGISTRIES'
-			
-			property 'forge.logging.console.level', 'debug'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', mod_id
 
             mods {
-                examplemod {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
@@ -61,10 +54,28 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
 
-			property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'debug'
+
+            property 'forge.enabledGameTestNamespaces', mod_id
 
             mods {
-                examplemod {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            property 'forge.enabledGameTestNamespaces', mod_id
+
+            mods {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
@@ -75,12 +86,13 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
 
-			property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'debug'
 
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                examplemod {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
@@ -92,29 +104,48 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-  
+	maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18-38.0.14'
-	implementation fg.deobf('curse.maven:epicfight-405076:4861783')
-	implementation fg.deobf('curse.maven:paragliders-289240:4478246')
-	implementation fg.deobf('curse.maven:paraglidersdbl-933729:4874431')
-	implementation fg.deobf('curse.maven:atlas-463826:4567244')
-	compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.18.2-5.0.9.1:api")
-	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+	implementation fg.deobf('curse.maven:epicfight-405076:5604255')
+	implementation fg.deobf('curse.maven:atlas-463826:5254550')
+	implementation fg.deobf('curse.maven:curios-309927:5367944')
+}
+
+def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta']
+def replaceProperties = [
+        minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+        forge_version: forge_version, forge_version_range: forge_version_range,
+        loader_version_range: loader_version_range,
+        mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+        mod_authors: mod_authors, mod_description: mod_description
+]
+processResources {
+    inputs.properties replaceProperties
+    replaceProperties.put 'project', project
+
+    filesMatching(resourceTargets) {
+        expand replaceProperties
+    }
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "dawncraftclasses",
-                "Specification-Vendor"    : "smileycorp",
+                "Specification-Title"     : mod_id,
+                "Specification-Vendor"    : mod_authors,
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "smileycorp",
+                "Implementation-Vendor"   : mod_authors,
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
@@ -137,4 +168,8 @@ publishing {
             url "file://${project.projectDir}/mcmodsrepo"
         }
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }

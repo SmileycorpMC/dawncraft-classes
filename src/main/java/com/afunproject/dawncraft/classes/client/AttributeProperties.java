@@ -6,9 +6,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -40,9 +40,9 @@ public class AttributeProperties extends SimplePreparableReloadListener<List<Jso
         try {
             for (String domain : manager.getNamespaces()) {
                 ResourceLocation loc = new ResourceLocation(domain, "attributes.json");
-                if (!manager.hasResource(loc)) continue;
-                for (Resource resource : manager.getResources(loc)) {
-                    Reader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+                if (manager.getResource(loc).isEmpty()) continue;
+                for (Resource resource : manager.getResourceStack(loc)) {
+                    Reader reader = new BufferedReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
                     JsonElement json = GsonHelper.fromJson(GSON, reader, JsonElement.class);
                     if (!json.isJsonObject()) continue;
                     properties.add(json.getAsJsonObject());
@@ -73,9 +73,9 @@ public class AttributeProperties extends SimplePreparableReloadListener<List<Jso
         if (properties.containsKey(attribute)) {
             AttributeProperty property = properties.get(attribute);
             double scaledValue = value / property.getBase();
-            return new TextComponent(property.getMode() == AttributeProperty.DisplayMode.PERCENTAGE ? (format("%.2f", scaledValue * 100f) + "%") : format("%.2f", scaledValue));
+            return Component.literal(property.getMode() == AttributeProperty.DisplayMode.PERCENTAGE ? (format("%.2f", scaledValue * 100f) + "%") : format("%.2f", scaledValue));
         }
-        return new TextComponent(format("%.2f",value));
+        return Component.literal(format("%.2f",value));
     }
     
     private String format(String format, double value) {

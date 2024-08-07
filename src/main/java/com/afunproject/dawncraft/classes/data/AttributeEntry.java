@@ -2,31 +2,30 @@ package com.afunproject.dawncraft.classes.data;
 
 import com.afunproject.dawncraft.classes.ClassesLogger;
 import com.afunproject.dawncraft.classes.client.AttributeProperties;
-import com.afunproject.dawncraft.classes.integration.ParaglidersIntegration;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class AttributeEntry {
 
     private final Attribute attribute;
     private final double value;
+    private final ResourceLocation registry;
     private MutableComponent text;
     
     public AttributeEntry(ResourceLocation attribute, double value) throws Exception {
         this.attribute = ForgeRegistries.ATTRIBUTES.getValue(attribute);
+        this.registry = attribute;
         if (this.attribute == null) throw new NullPointerException("Attribute " + attribute + " not registered.");
         this.value = value;
     }
 
     public void apply(Player player) {
-        ClassesLogger.logInfo("Applying attribute " + attribute.getRegistryName() + " with value " + value + " to player " + player.getDisplayName().getString());
-        if (ModList.get().isLoaded("paraglider") && ParaglidersIntegration.isStamina(attribute)) ParaglidersIntegration.apply(player, value);
-        else player.getAttribute(attribute).setBaseValue(value);
+        ClassesLogger.logInfo("Applying attribute " + registry + " with value " + value + " to player " + player.getDisplayName().getString());
+        player.getAttribute(attribute).setBaseValue(value);
     }
     
     public Attribute getAttribute() {
@@ -38,7 +37,7 @@ public class AttributeEntry {
     }
     
     public ResourceLocation getName() {
-        return attribute.getRegistryName();
+        return registry;
     }
     
     public MutableComponent getText() {

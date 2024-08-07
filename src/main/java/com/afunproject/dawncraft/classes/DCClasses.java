@@ -3,9 +3,7 @@ package com.afunproject.dawncraft.classes;
 import com.afunproject.dawncraft.classes.client.AttributeProperties;
 import com.afunproject.dawncraft.classes.data.DefaultDataGenerator;
 import com.afunproject.dawncraft.classes.network.NetworkHandler;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.packs.FolderPackResources;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
@@ -17,6 +15,7 @@ import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.resource.PathPackResources;
 
 import java.nio.file.Path;
 
@@ -36,9 +35,10 @@ public class DCClasses {
     @SubscribeEvent
     public static void addPacks(AddPackFindersEvent event) {
         Path path = FMLPaths.CONFIGDIR.get().resolve("dcclasses");
-        event.addRepositorySource((consumer, constructor) -> consumer.accept(constructor.create(path.toString(), new TextComponent("DC Classes Config"), true,
-                    ()-> new FolderPackResources(path.toFile()), new PackMetadataSection(new TextComponent("DC Classes Config"), 8),
-                    Pack.Position.TOP, PackSource.BUILT_IN, false))
+        event.addRepositorySource(consumer -> consumer
+                .accept(Pack.readMetaAndCreate(path.toString(), Component.literal("DC Classes Config"), true,
+                    str -> new PathPackResources("dcclasses-config", true, path), event.getPackType(),
+                    Pack.Position.TOP, PackSource.BUILT_IN))
         );
     }
     

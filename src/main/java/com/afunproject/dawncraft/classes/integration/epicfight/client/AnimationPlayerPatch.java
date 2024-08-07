@@ -2,7 +2,6 @@ package com.afunproject.dawncraft.classes.integration.epicfight.client;
 
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
@@ -32,9 +31,8 @@ public class AnimationPlayerPatch extends AbstractClientPlayerPatch<AbstractClie
         }
         
         @Override
-        public void poseTick() {
-            Pose currentPose = getComposedLayerPose(1.0F);
-            entitypatch.getArmature().setPose(currentPose);
+        public void tick() {
+            playAnimation(getLivingMotion(entitypatch.currentLivingMotion), 0f);
         }
         
         public DynamicAnimation getCurrentAnimation() {

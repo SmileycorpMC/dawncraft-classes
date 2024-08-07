@@ -1,24 +1,10 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/dc-classes",
-  "1.18.2": {
-	"1.1.0": "First version for 1.18.2",
-	"1.1.0a": "fix issues with how class properties are granted ",
-	"1.1.0b": "fix bug that caused attributes to be lost on respawn",
-	"1.1.0c": "fix crash when players respawn",
-	"1.1.1": "fix, finish and enable class selection gui, fix some crashes when using /pickClass",
-	"1.1.1a": "fix crash when loading invalid skills",
-	"1.1.2": "add stamina and health display to class gui, add gui background boxes",
-	"1.1.3": "add dynamic attribute system, attribute icons and epic fight animations, add data/resource pack to config with default class data",
-	"1.1.3a": "fix dependencies",
-	"1.1.3b": "fix compatibility with paragliders and double stamina paragliders",
-	"1.1.3c": "fix stamina sometimes being reset on respawn",
-	"1.1.4": "add player offset property",
-	"1.1.4a": "rework text line calculation to fix issues displaying large characters in class descriptions",
-	"1.1.4b": "reopen class selection screen every tick if not already open to prevent invincible players",
-	"1.1.5": "add the ability for classes to run commands, rework gui, add extra attribute client properties"
+  "1.20.1": {
+	"1.1.5": "first update for 1.20.1"
   },
   "promos": {
-    "1.18.2-latest": "1.1.5",
-    "1.18.2-recommended": "1.1.5"
+    "1.20.1-latest": "1.1.5",
+    "1.20.1-recommended": "1.1.5"
   }
 }
