@@ -11,5 +11,23 @@
 	"generic.movement_speed": {
 		"base_value": 0.1,
 		"display_mode": "DECIMAL"
+	},
+	"generic.luck": {
+		"base_value": 1,
+		"display_mode": "DECIMAL",
+		"text_colour": "dark_green"
+	},
+	"generic.max_absorption": {
+		"base_value": 2,
+		"display_mode": "DECIMAL",
+		"text_colour": "0xDDD605"
+	},
+	"generic.scale": {
+		"base_value": 1,
+		"display_mode": "PERCENTAGE"
+	},
+	"generic.jump_strength": {
+		"base_value": 0.7,
+		"display_mode": "PERCENTAGE"
 	}
 }
