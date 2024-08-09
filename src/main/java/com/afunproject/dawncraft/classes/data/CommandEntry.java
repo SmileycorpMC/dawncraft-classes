@@ -16,9 +16,13 @@ public class CommandEntry {
         this.stage = stage;
     }
     
-    public void apply(ServerPlayer player) {
-        MinecraftServer server = player.getServer();
-        ClassesLogger.logInfo("Running command " + command + " for player " + player.getDisplayName().getString());
+    public void apply(CommandContext ctx) {
+        MinecraftServer server = ctx.getServer();
+        ServerPlayer player = ctx.getPlayer();
+        if (command.contains("@s") && ctx.getEntity() == null) return;
+        String command = this.command.replace("@s", ctx.getEntity().getUUID().toString());
+        ClassesLogger.logInfo("Running command " + command +
+                " for player " + player.getDisplayName().getString());
         server.getCommands().performCommand(server.createCommandSourceStack().withSuppressedOutput().withPermission(2)
                         .withEntity(player).withPosition(player.position()).withLevel(player.getLevel()), command);
     }

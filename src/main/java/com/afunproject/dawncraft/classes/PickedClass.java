@@ -1,6 +1,7 @@
 package com.afunproject.dawncraft.classes;
 
 import com.afunproject.dawncraft.classes.data.CommandApplyStage;
+import com.afunproject.dawncraft.classes.data.CommandContext;
 import com.afunproject.dawncraft.classes.data.DCClass;
 import com.afunproject.dawncraft.classes.integration.epicfight.EpicFightIntegration;
 import net.minecraft.core.Direction;
@@ -74,7 +75,7 @@ public interface PickedClass {
             if (ModList.get().isLoaded("epicfight")) EpicFightIntegration.applySkills(clazz, player);
             applyStatModifiers(player);
             if (addItems) clazz.addItems(player);
-            clazz.runCommands(player, CommandApplyStage.PICK_CLASS, CommandApplyStage.RESPAWN);
+            clazz.runCommands(new CommandContext.Builder(player).build(), CommandApplyStage.PICK_CLASS, CommandApplyStage.RESPAWN);
             ClassesLogger.logInfo("Set player " + player.getDisplayName().getString() + " to class " + clazz);
             hasEffect = true;
         }

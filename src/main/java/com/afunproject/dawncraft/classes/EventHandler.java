@@ -1,9 +1,6 @@
 package com.afunproject.dawncraft.classes;
 
-import com.afunproject.dawncraft.classes.data.CommandApplyStage;
-import com.afunproject.dawncraft.classes.data.CommandEntry;
-import com.afunproject.dawncraft.classes.data.DCClass;
-import com.afunproject.dawncraft.classes.data.DCClassLoader;
+import com.afunproject.dawncraft.classes.data.*;
 import com.afunproject.dawncraft.classes.network.NetworkHandler;
 import com.afunproject.dawncraft.classes.network.OpenClassGUIMessage;
 import com.mojang.brigadier.CommandDispatcher;
@@ -82,13 +79,13 @@ public class EventHandler {
             CommandApplyStage stage = entry.getStage();
             if (stage instanceof CommandApplyStage.Ticking && player.tickCount %
                     ((CommandApplyStage.Ticking) stage).getInterval() == 0)
-                entry.apply((ServerPlayer) player);
+                entry.apply(new CommandContext.Builder((ServerPlayer) player).build());
         }
     }
     
     @SubscribeEvent
     public void damage(LivingAttackEvent event) {
-        if (event.getEntity() == null) return;
+        if (!(event.getEntity() instanceof ServerPlayer)) return;
         Entity entity = event.getEntity();
         LazyOptional<PickedClass> optional = entity.getCapability(DCClasses.PICKED_CLASS);
         if (!optional.isPresent()) return;
@@ -96,7 +93,7 @@ public class EventHandler {
         if (cap.isGUIOpen()) event.setCanceled(true);
         Optional<DCClass> clazz = cap.getDCClass();
         if (clazz.isEmpty()) return;
-        clazz.get().runCommands((ServerPlayer) entity, CommandApplyStage.HURT);
+        clazz.get().runCommands(new CommandContext.Builder((ServerPlayer) entity).entity(event.getSource().getEntity()).build(), CommandApplyStage.HURT);
     }
     
     @SubscribeEvent
@@ -107,7 +104,7 @@ public class EventHandler {
         if (!optional.isPresent()) return;
         Optional<DCClass> clazz = optional.orElseGet(null).getDCClass();
         if (clazz.isEmpty()) return;
-        clazz.get().runCommands((ServerPlayer) attacker, CommandApplyStage.ATTACK);
+        clazz.get().runCommands(new CommandContext.Builder((ServerPlayer) attacker).entity(event.getEntity()).build(), CommandApplyStage.ATTACK);
     }
     
     @SubscribeEvent
@@ -120,7 +117,7 @@ public class EventHandler {
         if (cap.isGUIOpen()) event.setCanceled(true);
         Optional<DCClass> clazz = cap.getDCClass();
         if (clazz.isEmpty()) return;
-        clazz.get().runCommands((ServerPlayer) entity, CommandApplyStage.DIE);
+        clazz.get().runCommands(new CommandContext.Builder((ServerPlayer) entity).entity(event.getSource().getEntity()).build(), CommandApplyStage.DIE);
     }
     
     @SubscribeEvent
@@ -133,7 +130,7 @@ public class EventHandler {
         if (cap.isGUIOpen()) event.setCanceled(true);
         Optional<DCClass> clazz = cap.getDCClass();
         if (clazz.isEmpty()) return;
-        clazz.get().runCommands((ServerPlayer) entity, CommandApplyStage.KILL);
+        clazz.get().runCommands(new CommandContext.Builder((ServerPlayer) entity).entity(event.getEntity()).build(), CommandApplyStage.KILL);
     }
 
     @SubscribeEvent
@@ -150,7 +147,7 @@ public class EventHandler {
             cap.load(optionalOld.orElseGet(null).save());
             Optional<DCClass> clazz = cap.getDCClass();
             if (clazz.isEmpty()) return;
-            clazz.get().runCommands((ServerPlayer) player, CommandApplyStage.RESPAWN);
+            clazz.get().runCommands(new CommandContext.Builder((ServerPlayer) player).build(), CommandApplyStage.RESPAWN);
         }
     }
 

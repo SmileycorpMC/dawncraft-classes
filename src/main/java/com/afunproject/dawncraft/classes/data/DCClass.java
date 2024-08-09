@@ -83,9 +83,9 @@ public class DCClass {
         for (ItemEntry item : items) item.apply(player);
     }
     
-    public void runCommands(ServerPlayer player, CommandApplyStage... stages) {
-        ClassesLogger.logInfo("Running " + this + " commands for player " + player.getDisplayName().getString());
-        for (CommandEntry command : commands) for (CommandApplyStage stage : stages) if (command.getStage() == stage) command.apply(player);
+    public void runCommands(CommandContext ctx, CommandApplyStage... stages) {
+        ClassesLogger.logInfo("Running " + this + " commands for player " + ctx.getPlayer().getDisplayName().getString());
+        for (CommandEntry command : commands) for (CommandApplyStage stage : stages) if (command.getStage() == stage) command.apply(ctx);
     }
     
     public int getIndex() {
