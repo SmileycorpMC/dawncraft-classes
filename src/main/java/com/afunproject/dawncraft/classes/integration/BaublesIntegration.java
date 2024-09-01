@@ -6,7 +6,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
-public class CuriosIntegration {
+public class BaublesIntegration {
 
     public static void addItem(Player player, String slot, ItemStack stack) {
         CuriosApi.getCuriosHelper().setEquippedCurio(player, slot, 0, stack);

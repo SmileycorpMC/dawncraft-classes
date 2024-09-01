@@ -6,34 +6,25 @@ import com.afunproject.dawncraft.classes.data.DCClass;
 import com.afunproject.dawncraft.classes.data.DCClassLoader;
 import com.afunproject.dawncraft.classes.network.NetworkHandler;
 import com.afunproject.dawncraft.classes.network.OpenClassGUIMessage;
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Optional;
 
 public class EventHandler {
     
-    @SubscribeEvent
+    /*@SubscribeEvent
     public void addResourceReload(AddReloadListenerEvent event) {
         event.addListener(DCClassLoader.INSTANCE);
-    }
+    }*/
 
     @SubscribeEvent
     public void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -43,7 +34,7 @@ public class EventHandler {
     @SubscribeEvent
     public void attachEntityCapabilities(AttachCapabilitiesEvent<Entity> event) {
         Entity entity = event.getObject();
-        if (entity instanceof Player &! (entity instanceof FakePlayer)) {
+        if (entity instanceof EntityPlayer &! (entity instanceof FakePlayer)) {
             event.addCapability(Constants.loc("picked_class"), new PickedClass.Provider());
         }
     }

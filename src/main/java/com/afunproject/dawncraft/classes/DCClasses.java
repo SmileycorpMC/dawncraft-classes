@@ -20,8 +20,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
 
-@Mod(Constants.MODID)
-@Mod.EventBusSubscriber(modid = Constants.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod(modid = Constants.MODID, name=Constants.NAME, version = Constants.VERSION, dependencies = Constants.DEPENDENCIES)
 public class DCClasses {
 
     public static Capability<PickedClass> PICKED_CLASS = CapabilityManager.get(new CapabilityToken<>(){});

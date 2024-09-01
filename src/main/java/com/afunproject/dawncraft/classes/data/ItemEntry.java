@@ -1,7 +1,7 @@
 package com.afunproject.dawncraft.classes.data;
 
 import com.afunproject.dawncraft.classes.ClassesLogger;
-import com.afunproject.dawncraft.classes.integration.CuriosIntegration;
+import com.afunproject.dawncraft.classes.integration.BaublesIntegration;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +27,7 @@ public class ItemEntry {
     public void apply(Player player) {
         ClassesLogger.logInfo("set " + stack + " to slot " + slot);
         if (slot.contains("curios:") && ModList.get().isLoaded("curios"))
-            CuriosIntegration.addItem(player, slot.replace("curios:", ""), stack.copy());
+            BaublesIntegration.addItem(player, slot.replace("curios:", ""), stack.copy());
         else {
             EquipmentSlot slot;
             try {

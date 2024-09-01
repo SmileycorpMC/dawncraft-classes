@@ -5,37 +5,33 @@ import com.afunproject.dawncraft.classes.Constants;
 import com.afunproject.dawncraft.classes.data.AttributeEntry;
 import com.afunproject.dawncraft.classes.data.DCClass;
 import com.afunproject.dawncraft.classes.data.ItemEntry;
-import com.afunproject.dawncraft.classes.integration.CuriosIntegration;
+import com.afunproject.dawncraft.classes.integration.BaublesIntegration;
 import com.afunproject.dawncraft.classes.integration.epicfight.EpicFightIntegration;
 import com.afunproject.dawncraft.classes.integration.epicfight.client.EpicFightPlayerRenderer;
 import com.afunproject.dawncraft.classes.integration.epicfight.client.SkillSlot;
 import com.afunproject.dawncraft.classes.network.NetworkHandler;
 import com.afunproject.dawncraft.classes.network.PickClassMessage;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Widget;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.gui.GuiUtils;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.network.NetworkDirection;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraftforge.fml.common.Loader;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ClassSelectionScreen extends Screen {
+public class ClassSelectionScreen extends GuiScreen {
     
     public static final ResourceLocation TEXTURE = Constants.loc("textures/gui/class_selection.png");
     
@@ -44,20 +40,20 @@ public class ClassSelectionScreen extends Screen {
     protected int guiHeight = 180;
     private int page = 0;
     private final List<DCClass> classes;
-    private final RemotePlayer player;
+    private final EntityOtherPlayerMP player;
     private final EpicFightPlayerRenderer playerRenderer;
-    private final List<AbstractButton> buttons = Lists.newArrayList();
+    private final List<GuiButton> buttons = Lists.newArrayList();
     protected int leftPos;
     protected int topPos;
-    protected final List<Component> description = Lists.newArrayList();
+    protected final List<TextComponentBase> description = Lists.newArrayList();
     private final List<ClassSlot> slots = Lists.newArrayList();
     private int itemX, itemWidth, itemHeight, skillX, skillWidth, skillHeight;
 
     public ClassSelectionScreen(List<DCClass> cache) {
-        super(new TranslatableComponent("title.dcclasses.screen"));
-        Minecraft minecraft = Minecraft.getInstance();
-        player = new RemotePlayer(minecraft.level, minecraft.player.getGameProfile());
-        playerRenderer = ModList.get().isLoaded("epicfight") ? new EpicFightPlayerRenderer(player) : null;
+        super();
+        Minecraft minecraft = Minecraft.getMinecraft();
+        player = new EntityOtherPlayerMP(minecraft.world, minecraft.player.getGameProfile());
+        playerRenderer = Loader.isModLoaded("epicfight") ? new EpicFightPlayerRenderer(player) : null;
         if (cache.isEmpty()) {
             ClassesLogger.logError("no enabled classes ", new Exception());
             classes = null;
@@ -80,18 +76,18 @@ public class ClassSelectionScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        renderDirtBackground(0);
-        GuiUtils.drawContinuousTexturedBox(poseStack, TEXTURE, leftPos + 10, topPos + 10, 0, 0, 148, 106, 32, 42, 19, 9, 9,9, 1);
-        for(Widget widget : buttons) widget.render(poseStack, mouseX, mouseY, partialTicks);
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        drawDefaultBackground();
+        GuiUtils.drawContinuousTexturedBox(TEXTURE, leftPos + 10, topPos + 10, 0, 0, 148, 106, 32, 42, 19, 9, 9,9, 1);
+        for(GuiButton widget : buttons) widget.drawButton(mc, mouseX, mouseY, partialTicks);
         DCClass clazz = getSelectedClass();
         if (clazz == null) return;
         //title
-        drawBox(poseStack, leftPos + 18, topPos - 10, 131, 17);
-        drawCenteredString(poseStack, minecraft.font,  new TranslatableComponent(clazz.getTranslationKey()), leftPos + guiWidth /2, topPos -6, 0x9E0CD2);
+        drawBox(leftPos + 18, topPos - 10, 131, 17);
+        drawCenteredString(mc.fontRenderer, new TextComponentTranslation(clazz.getTranslationKey()).getFormattedText(), leftPos + guiWidth /2, topPos -6, 0x9E0CD2);
         //description
         int offset = (int)((float)(description.size() * 9)/2f);
-        drawBox(poseStack, leftPos - 6, topPos + guiHeight / 2 + 48 - offset, 179, description.size() * 9 + 8);
+        drawBox(leftPos - 6, topPos + guiHeight / 2 + 48 - offset, 179, description.size() * 9 + 8);
         for (int i = 0; i < description.size(); i ++) {
             Component component = description.get(i);
             drawCenteredString(poseStack, minecraft.font,  component, leftPos + guiWidth / 2, topPos + guiHeight / 2 + 52 + i * 9 - offset, 0xFFFFFF);
@@ -99,20 +95,20 @@ public class ClassSelectionScreen extends Screen {
         //player
         int entityX = leftPos + guiWidth / 2;
         int entityY = topPos + guiHeight / 2 + 13;
-        if (playerRenderer != null) playerRenderer.render(poseStack, entityX + clazz.getXOffset(), entityY + clazz.getYOffset(), partialTicks, clazz.getAnimation());
+        if (playerRenderer != null) playerRenderer.render(entityX + clazz.getXOffset(), entityY + clazz.getYOffset(), partialTicks, clazz.getAnimation());
         else InventoryScreen.renderEntityInInventory(entityX, entityY, 38, entityX - mouseX, entityY + (player.getEyeHeight()) - mouseY, player);
         //items, skills and attributes
         if (itemHeight > 0) {
-            drawBox(poseStack, itemX, topPos + 17, itemWidth, itemHeight);
-            drawCenteredString(poseStack, minecraft.font, new TranslatableComponent("text.dcclasses.items"), leftPos - 12, topPos + 21, 0xFFFFFF);
+            drawBox(itemX, topPos + 17, itemWidth, itemHeight);
+            drawCenteredString(mc.fontRenderer, new TextComponentTranslation("text.dcclasses.items").getFormattedText(), leftPos - 12, topPos + 21, 0xFFFFFF);
         }
         if (skillHeight > 0) {
-            drawBox(poseStack, skillX, topPos + 17, skillWidth, skillHeight);
-            drawCenteredString(poseStack, minecraft.font, new TranslatableComponent("text.dcclasses.skills"), leftPos + guiWidth + 12, topPos + 21, 0xFFFFFF);
+            drawBox(skillX, topPos + 17, skillWidth, skillHeight);
+            drawCenteredString(mc.fontRenderer, new TextComponentTranslation("text.dcclasses.skills"), leftPos + guiWidth + 12, topPos + 21, 0xFFFFFF);
         }
         ClassSlot hoveredSlot = null;
         for (ClassSlot slot : slots) {
-            slot.render(poseStack, mouseX, mouseY, partialTicks);
+            slot.render(mouseX, mouseY, partialTicks);
             if (hoveredSlot == null && slot.isMouseOver(mouseX, mouseY)) hoveredSlot = slot;
         }
         if (hoveredSlot != null) renderTooltip(poseStack, hoveredSlot.getTooltip(), Optional.empty(), mouseX, mouseY);
@@ -157,7 +153,7 @@ public class ClassSelectionScreen extends Screen {
         if (clazz == null) return;
         for (EquipmentSlot slot : EquipmentSlot.values()) player.setItemSlot(slot, ItemStack.EMPTY);
         player.getInventory().clearContent();
-        if (ModList.get().isLoaded("curios")) CuriosIntegration.clear(player);
+        if (ModList.get().isLoaded("curios")) BaublesIntegration.clear(player);
         clazz.setVisualEquipment(player);
     }
     
@@ -165,7 +161,7 @@ public class ClassSelectionScreen extends Screen {
         description.clear();
         DCClass clazz = getSelectedClass();
         if (clazz == null) return;
-        String str = new TranslatableComponent(clazz.getTranslationKey() + ".desc").getString();
+        String str = new TextComponentTranslation(clazz.getTranslationKey() + ".desc").getString();
         int position = 0;
         while (position < str.length()) {
             if (description.size() >= 7) break;
@@ -203,36 +199,34 @@ public class ClassSelectionScreen extends Screen {
         List <AttributeEntry> attributes = clazz.getAttributes();
         for (int i = 0; i < attributes.size(); i++) {
             AttributeEntry attribute = attributes.get(i);
-            int width = minecraft.font.width(attribute.getText()) + 11;
+            int width = mc.fontRenderer.getStringWidth(attribute.getText().getFormattedText()) + 11;
             slots.add(new AttributeSlot(attribute, width, leftPos + 11 + (int)((((float)guiWidth - 22f) * (float) (i + 1)) / (attributes.size() + 1f)) - (int)((float)width * 0.5f), topPos + 13));
         }
         List<ItemEntry> items = clazz.getItems();
         int itemRows = (int)(((float)items.size() -1) / 3f) + 1;
-        itemWidth = Math.max(itemRows * 18, minecraft.font.width(new TranslatableComponent("text.dcclasses.items"))) + 8;
+        itemWidth = Math.max(itemRows * 18, mc.fontRenderer.getStringWidth(new TextComponentTranslation("text.dcclasses.items").getFormattedText())) + 8;
         itemHeight = items.isEmpty() ? 0 : 20 + (int)Math.ceil((float)items.size()/(float)itemRows) * 18;
         itemX = leftPos - 12 - (int)((float)itemWidth / 2f);
         for (int i = 0; i < items.size(); i++) slots.add(new ItemSlot(items.get(i),leftPos - 28 + itemRows * 8 - i % itemRows * 18, topPos + 32 + (i / itemRows) * 18));
-        if (!ModList.get().isLoaded("epicfight")) return;
+        if (Loader.isModLoaded("epicfight")) return;
         List<String> skills = EpicFightIntegration.getVerifiedSkills(clazz);
         int skillRows = (int)((float)(skills.size() -1) / 3f) + 1;
-        skillWidth = Math.max(skillRows * 18, minecraft.font.width(new TranslatableComponent("text.dcclasses.skills"))) + 8;
+        skillWidth = Math.max(skillRows * 18, mc.fontRenderer.getStringWidth(new TextComponentTranslation("text.dcclasses.skills").getFormattedText())) + 8;
         skillHeight = skills.isEmpty() ? 0 : 20 + (int)Math.ceil((float)skills.size()/(float)skillRows) * 18;
         skillX = leftPos + guiWidth + 12 - (int)((float)skillWidth / 2f);
         for (int i = 0; i < skills.size(); i++) slots.add(new SkillSlot(skills.get(i), leftPos + guiWidth + 12 - skillRows * 8 + i % skillRows * 18, topPos + 32 + (i / skillRows) * 18));
     }
     
-    private void drawBox(PoseStack poseStack, int x, int y, int width, int height) {
-        GuiUtils.drawContinuousTexturedBox(poseStack, TEXTURE, x, y, 0, 42, width, height, 32, 32, 4, 4, 4, 4, 1);
+    private void drawBox(int x, int y, int width, int height) {
+        GuiUtils.drawContinuousTexturedBox(TEXTURE, x, y, 0, 42, width, height, 32, 32, 4, 4, 4, 4, 1);
     }
     
     @Override
-    public boolean isPauseScreen() {
+    public boolean doesGuiPauseGame() {
         return true;
     }
     
     @Override
-    public boolean shouldCloseOnEsc() {
-        return false;
-    }
+    protected void keyTyped(char typedChar, int keyCode) {}
 
 }

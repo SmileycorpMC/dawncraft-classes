@@ -3,14 +3,14 @@ package com.afunproject.dawncraft.classes;
 import com.afunproject.dawncraft.classes.data.CommandApplyStage;
 import com.afunproject.dawncraft.classes.data.DCClass;
 import com.afunproject.dawncraft.classes.integration.epicfight.EpicFightIntegration;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -26,9 +26,9 @@ public interface PickedClass {
 
     boolean hasEffect();
 
-    void applyEffect(ServerPlayer player, boolean addItems);
+    void applyEffect(EntityPlayerMP player, boolean addItems);
 
-    void applyStatModifiers(ServerPlayer player);
+    void applyStatModifiers(EntityPlayerMP player);
     
     void setGUIOpen(boolean GUIOpen);
     
@@ -36,9 +36,9 @@ public interface PickedClass {
     
     boolean hasStatModifiers();
 
-    CompoundTag save();
+    NBTTagCompound save();
 
-    void load(CompoundTag tag);
+    void load(NBTTagCompound tag);
 
     class Implementation implements PickedClass {
 
@@ -68,20 +68,20 @@ public interface PickedClass {
         }
 
         @Override
-        public void applyEffect(ServerPlayer player, boolean addItems) {
-            if (clazz.isEmpty()) return;
+        public void applyEffect(EntityPlayerMP player, boolean addItems) {
+            if (!clazz.isPresent()) return;
             DCClass clazz = this.clazz.get();
-            if (ModList.get().isLoaded("epicfight")) EpicFightIntegration.applySkills(clazz, player);
+            if (Loader.isModLoaded("epicfight")) EpicFightIntegration.applySkills(clazz, player);
             applyStatModifiers(player);
             if (addItems) clazz.addItems(player);
             clazz.runCommands(player, CommandApplyStage.PICK_CLASS, CommandApplyStage.RESPAWN);
-            ClassesLogger.logInfo("Set player " + player.getDisplayName().getString() + " to class " + clazz);
+            ClassesLogger.logInfo("Set player " + player.getDisplayName().getFormattedText() + " to class " + clazz);
             hasEffect = true;
         }
 
         @Override
-        public void applyStatModifiers(ServerPlayer player) {
-            if (clazz.isEmpty()) return;
+        public void applyStatModifiers(EntityPlayerMP player) {
+            if (!clazz.isPresent()) return;
             clazz.get().applyStatModifiers(player);
             hasEffect = true;
             hasStatModifiers = true;
@@ -103,41 +103,61 @@ public interface PickedClass {
         }
     
         @Override
-        public CompoundTag save() {
-            CompoundTag tag = new CompoundTag();
-            if (clazz.isPresent()) tag.putString("class", clazz.get().toString());
-            if (hasEffect) tag.putBoolean("hasEffect", hasEffect);
+        public NBTTagCompound save() {
+            NBTTagCompound tag = new NBTTagCompound();
+            if (clazz.isPresent()) tag.setString("class", clazz.get().toString());
+            if (hasEffect) tag.setBoolean("hasEffect", hasEffect);
             return tag;
         }
 
         @Override
-        public void load(CompoundTag tag) {
-            if (tag.contains("class")) clazz = Optional.of(ClassHandler.getClass(new ResourceLocation(tag.getString("class"))));
-            if (tag.contains("hasEffect")) hasEffect = tag.getBoolean("hasEffect");
+        public void load(NBTTagCompound tag) {
+            if (tag.hasKey("class")) clazz = Optional.of(ClassHandler.getClass(new ResourceLocation(tag.getString("class"))));
+            if (tag.hasKey("hasEffect")) hasEffect = tag.getBoolean("hasEffect");
         }
 
     }
+    
+    class Storage implements Capability.IStorage<PickedClass> {
+        
+        @Nullable
+        @Override
+        public NBTBase writeNBT(Capability<PickedClass> capability, PickedClass instance, EnumFacing side) {
+            return instance.save();
+        }
+        
+        @Override
+        public void readNBT(Capability<PickedClass> capability, PickedClass instance, EnumFacing side, NBTBase nbt) {
+            instance.load((NBTTagCompound) nbt);
+        }
+        
+    }
 
-    class Provider implements ICapabilitySerializable<CompoundTag> {
+    class Provider implements ICapabilitySerializable<NBTTagCompound> {
 
         private final PickedClass impl;
 
         public Provider() {
             impl = new Implementation();
         }
-
+        
         @Override
-        public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-            return cap == DCClasses.PICKED_CLASS ? LazyOptional.of(() -> impl).cast() : LazyOptional.empty();
+        public boolean hasCapability(Capability<?> cap, EnumFacing side) {
+            return cap == DCClasses.PICKED_CLASS;
+        }
+        
+        @Override
+        public <T> T getCapability(Capability<T> cap, EnumFacing side) {
+            return cap == DCClasses.PICKED_CLASS ? DCClasses.PICKED_CLASS.cast(impl) : null;
         }
 
         @Override
-        public CompoundTag serializeNBT() {
+        public NBTTagCompound serializeNBT() {
             return impl.save();
         }
 
         @Override
-        public void deserializeNBT(CompoundTag nbt) {
+        public void deserializeNBT(NBTTagCompound nbt) {
             impl.load(nbt);
         }
 
