@@ -7,19 +7,19 @@
 	"starting_skills": [],
 	"items": [
 		{
-			"id": "minecraft:stone_axe",
+			"id": "minecraft:antitheus",
 			"slot": "mainhand"
 		},
 		{
-			"id": "minecraft:flint_and_steel",
+			"id": "minecraft:",
 			"slot": "mainhand"
 		},
 		{
-			"id": "minecraft:shears",
+			"id": "minecraft:",
 			"slot": "mainhand"
 		},
 		{
-			"id": "minecraft:water_bucket",
+			"id": "minecraft:",
 			"slot": "offhand"
 		}
 	],
